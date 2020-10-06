@@ -21,15 +21,20 @@
 
 #define ReceivedBufferLength 10  //length of the Serial CMD buffer
 
+#define DEVICE_MEM_OFFSET 8
+
 class DFRobot_PH
 {
 public:
-    DFRobot_PH();
+    DFRobot_PH(int device = 0);
     ~DFRobot_PH();
     void    calibration(float voltage, float temperature,char* cmd);  //calibration by Serial CMD
     void    calibration(float voltage, float temperature);
     float   readPH(float voltage, float temperature); // voltage to pH value, with temperature compensation
     void    begin();   //initialization
+
+    void    showCalibration();
+    void    setCalibration(float neutralVoltage, float acidVoltage);
 
 private:
     float  _phValue;
@@ -46,6 +51,7 @@ private:
     void    phCalibration(byte mode); // calibration process, wirte key parameters to EEPROM
     byte    cmdParse(const char* cmd);
     byte    cmdParse();
+    int     mem_offset; // for multiple devices operation)
 };
 
 #endif

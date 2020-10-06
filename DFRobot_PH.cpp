@@ -26,13 +26,14 @@
 #define PHVALUEADDR 0x00    //the start address of the pH calibration parameters stored in the EEPROM
 
 
-DFRobot_PH::DFRobot_PH()
+DFRobot_PH::DFRobot_PH(int device)
 {
     this->_temperature    = 25.0;
     this->_phValue        = 7.0;
     this->_acidVoltage    = 2032.44;    //buffer solution 4.0 at 25C
     this->_neutralVoltage = 1500.0;     //buffer solution 7.0 at 25C
     this->_voltage        = 1500.0;
+    this->mem_offset      = device*DEVICE_MEM_OFFSET;
 }
 
 DFRobot_PH::~DFRobot_PH()
@@ -42,19 +43,21 @@ DFRobot_PH::~DFRobot_PH()
 
 void DFRobot_PH::begin()
 {
-    EEPROM_read(PHVALUEADDR, this->_neutralVoltage);  //load the neutral (pH = 7.0)voltage of the pH board from the EEPROM
+    Serial.print("original _neturalVoltage:");
+    Serial.println(this->_neutralVoltage);
+    EEPROM_read(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);  //load the neutral (pH = 7.0)voltage of the pH board from the EEPROM
     Serial.print("_neutralVoltage:");
     Serial.println(this->_neutralVoltage);
-    if(EEPROM.read(PHVALUEADDR)==0xFF && EEPROM.read(PHVALUEADDR+1)==0xFF && EEPROM.read(PHVALUEADDR+2)==0xFF && EEPROM.read(PHVALUEADDR+3)==0xFF){
+    if(EEPROM.read(PHVALUEADDR + this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+1+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+2+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+3+this->mem_offset)==0xFF){
         this->_neutralVoltage = 1500.0;  // new EEPROM, write typical voltage
-        EEPROM_write(PHVALUEADDR, this->_neutralVoltage);
+        EEPROM_write(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);
     }
-    EEPROM_read(PHVALUEADDR+4, this->_acidVoltage);//load the acid (pH = 4.0) voltage of the pH board from the EEPROM
+    EEPROM_read(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);//load the acid (pH = 4.0) voltage of the pH board from the EEPROM
     Serial.print("_acidVoltage:");
     Serial.println(this->_acidVoltage);
-    if(EEPROM.read(PHVALUEADDR+4)==0xFF && EEPROM.read(PHVALUEADDR+5)==0xFF && EEPROM.read(PHVALUEADDR+6)==0xFF && EEPROM.read(PHVALUEADDR+7)==0xFF){
+    if(EEPROM.read(PHVALUEADDR+4+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+5+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+6+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+7+this->mem_offset)==0xFF){
         this->_acidVoltage = 2032.44;  // new EEPROM, write typical voltage
-        EEPROM_write(PHVALUEADDR+4, this->_acidVoltage);
+        EEPROM_write(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);
     }
 }
 
@@ -188,9 +191,9 @@ void DFRobot_PH::phCalibration(byte mode)
             Serial.println();
             if(phCalibrationFinish){
                 if((this->_voltage>1322)&&(this->_voltage<1678)){
-                    EEPROM_write(PHVALUEADDR, this->_neutralVoltage);
+                    EEPROM_write(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);
                 }else if((this->_voltage>1854)&&(this->_voltage<2210)){
-                    EEPROM_write(PHVALUEADDR+4, this->_acidVoltage);
+                    EEPROM_write(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);
                 }
                 Serial.print(F(">>>Calibration Successful"));
             }else{
@@ -203,4 +206,18 @@ void DFRobot_PH::phCalibration(byte mode)
         }
         break;
     }
+}
+
+void DFRobot_PH::showCalibration() {
+    Serial.print(" neutralVoltage (pH 7): ");
+    Serial.println(this->_neutralVoltage, 3);
+    Serial.print(" acidVoltage (pH 4): ");
+    Serial.println(this->_acidVoltage, 3);
+}
+
+void DFRobot_PH::setCalibration(float neutralVoltage, float acidVoltage) {
+    this->_neutralVoltage = neutralVoltage;
+    this->_acidVoltage = acidVoltage;
+    EEPROM_write(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);
+    EEPROM_write(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);
 }
