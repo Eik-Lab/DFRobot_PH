@@ -28,10 +28,14 @@ class DFRobot_PH
 public:
     DFRobot_PH(int device = 0);
     ~DFRobot_PH();
-    void    calibration(float voltage, float temperature,char* cmd);  //calibration by Serial CMD
     void    calibration(float voltage, float temperature);
     float   readPH(float voltage, float temperature); // voltage to pH value, with temperature compensation
     void    begin();   //initialization
+
+    bool    isAcidic();
+    bool    isNeutral();
+    void    calibrateAcidic();
+    void    calibrateNeutral();
 
     void    showCalibration();
     void    setCalibration(float neutralVoltage, float acidVoltage);
@@ -43,14 +47,11 @@ private:
     float  _voltage;
     float  _temperature;
 
-    char   _cmdReceivedBuffer[ReceivedBufferLength];  //store the Serial CMD
-    byte   _cmdReceivedBufferIndex;
+    void    saveAcidic();
+    void    saveNeutral();
 
 private:
-    boolean cmdSerialDataAvailable();
     void    phCalibration(byte mode); // calibration process, wirte key parameters to EEPROM
-    byte    cmdParse(const char* cmd);
-    byte    cmdParse();
     int     mem_offset; // for multiple devices operation)
 };
 
