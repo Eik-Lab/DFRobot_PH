@@ -41,7 +41,7 @@ DFRobot_PH::~DFRobot_PH()
 
 }
 
-void DFRobot_PH::begin()
+void DFRobot_PH::begin(bool safe)
 {
     Serial.print("original _neturalVoltage:");
     Serial.println(this->_neutralVoltage);
@@ -59,6 +59,7 @@ void DFRobot_PH::begin()
         this->_acidVoltage = 2032.44;  // new EEPROM, write typical voltage
         EEPROM_write(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);
     }
+    this->safe = safe;
     Serial.println("\n [Enter anything to calibrate]");
 }
 
@@ -85,7 +86,7 @@ bool DFRobot_PH::isNeutral() {
 }
 
 void DFRobot_PH::calibrateNeutral() {
-    if (isNeutral()){        // buffer solution:7.0{
+    if (isNeutral() || !safe){        // buffer solution:7.0{
         Serial.println();
         Serial.print(F(">>>Buffer Solution:7.0"));
         this->_neutralVoltage = this->_voltage;
@@ -102,7 +103,7 @@ bool DFRobot_PH::isAcidic() {
 
 
 void DFRobot_PH::calibrateAcidic() {
-    if (isAcidic()){  //buffer solution:4.0
+    if (isAcidic() || !safe){  //buffer solution:4.0
         Serial.println();
         Serial.print(F(">>>Buffer Solution:4.0"));
         this->_acidVoltage =  this->_voltage;
