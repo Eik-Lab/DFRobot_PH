@@ -40,13 +40,16 @@ void loop() {
 }
 
 void serialEvent() {
-    ph.calibration(voltage, NULL); // pass voltage to library
-    if (ph.isNeutral()) {
-        ph.calibrateNeutral();
-    } else if (ph.isAcidic()) {
-        ph.calibrateAcidic();
-    } else {
-        Serial.print(voltage, 3);
-        Serial.println(" out of range for (1322, 1678) [pH 7] or (1854, 2210) [pH 4]");
+    if (Serial.available() > 0) {
+        Serial.readString(); // don't care
+        ph.calibration(voltage, NULL); // pass voltage to library
+        if (ph.isNeutral()) {
+            ph.calibrateNeutral();
+        } else if (ph.isAcidic()) {
+            ph.calibrateAcidic();
+        } else {
+            Serial.print(voltage, 3);
+            Serial.println(" out of range for (1322, 1678) [pH 7] or (1854, 2210) [pH 4]");
+        }
     }
 }
