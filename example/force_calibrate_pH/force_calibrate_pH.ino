@@ -28,13 +28,14 @@ String input_str;
 
 void setup() {
     Serial.begin(9600);
-    ph.begin();
+    ph.begin(false); // safe=false (skip voltage range checks)
 }
 
 void loop() {
     static unsigned long timepoint = millis();
     voltage = analogRead(PH_PIN)/1024.0*5000;
     phValue = ph.readPH(voltage, NULL);
+    Serial.println(phValue, 3);
 
     delay(1000);
 }
