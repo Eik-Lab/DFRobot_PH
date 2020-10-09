@@ -30,7 +30,7 @@ public:
     ~DFRobot_PH();
     void    calibration(float voltage, float temperature);
     float   readPH(float voltage, float temperature); // voltage to pH value, with temperature compensation
-    void    begin();   //initialization
+    void    begin(bool safe=true);   //initialization
 
     bool    isAcidic();
     bool    isNeutral();
@@ -53,6 +53,7 @@ private:
 private:
     void    phCalibration(byte mode); // calibration process, wirte key parameters to EEPROM
     int     mem_offset; // for multiple devices operation)
+    bool    safe;
 };
 
 #endif
