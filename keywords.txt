@@ -11,5 +11,8 @@ DFRobot_PH	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+begin  KEYWORD2
 readPH	KEYWORD2
-calibration	KEYWORD2
+setValuesToCalibrate  KEYWORD2
+calibrateAcidic  KEYWORD2
+calibrateNeutral  KEYWORD2

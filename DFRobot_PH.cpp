@@ -43,24 +43,24 @@ DFRobot_PH::~DFRobot_PH()
 
 void DFRobot_PH::begin(bool safe)
 {
-    Serial.print("original _neturalVoltage:");
+    Serial.print("[DFRobot_PH] original _neturalVoltage:");
     Serial.println(this->_neutralVoltage);
     EEPROM_read(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);  //load the neutral (pH = 7.0)voltage of the pH board from the EEPROM
-    Serial.print("_neutralVoltage:");
+    Serial.print("[DFRobot_PH] _neutralVoltage:");
     Serial.println(this->_neutralVoltage);
     if(EEPROM.read(PHVALUEADDR + this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+1+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+2+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+3+this->mem_offset)==0xFF){
         this->_neutralVoltage = 1500.0;  // new EEPROM, write typical voltage
         EEPROM_write(PHVALUEADDR+this->mem_offset, this->_neutralVoltage);
     }
     EEPROM_read(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);//load the acid (pH = 4.0) voltage of the pH board from the EEPROM
-    Serial.print("_acidVoltage:");
+    Serial.print("[DFRobot_PH] _acidVoltage:");
     Serial.println(this->_acidVoltage);
     if(EEPROM.read(PHVALUEADDR+4+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+5+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+6+this->mem_offset)==0xFF && EEPROM.read(PHVALUEADDR+7+this->mem_offset)==0xFF){
         this->_acidVoltage = 2032.44;  // new EEPROM, write typical voltage
         EEPROM_write(PHVALUEADDR+4+this->mem_offset, this->_acidVoltage);
     }
     this->safe = safe;
-    Serial.println("\n [Enter anything to calibrate]");
+    // Serial.println("\n [Enter anything to calibrate]");
 }
 
 float DFRobot_PH::readPH(float voltage, float temperature)
@@ -75,7 +75,7 @@ float DFRobot_PH::readPH(float voltage, float temperature)
     return _phValue;
 }
 
-void DFRobot_PH::calibration(float voltage, float temperature)
+void DFRobot_PH::setValuesToCalibrate(float voltage, float temperature)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
@@ -85,15 +85,18 @@ bool DFRobot_PH::isNeutral() {
     return (this->_voltage>1322)&&(this->_voltage<1678);
 }
 
-void DFRobot_PH::calibrateNeutral() {
+bool DFRobot_PH::calibrateNeutral() {
     if (isNeutral() || !safe){        // buffer solution:7.0{
-        Serial.println();
-        Serial.print(F(">>>Buffer Solution:7.0"));
+        Serial.println(F("\n>>>Buffer Solution:7.0"));
+        Serial.print(F("Voltage: "));
+        Serial.println(this->_voltage, 3);
         this->_neutralVoltage = this->_voltage;
         saveNeutral();
+        return true;
     } else {
         Serial.print(this->_voltage, DEC);
         Serial.println(" out of range (1322, 1678). Not pH 7.0");
+        return false;
     }
 }
 
@@ -102,15 +105,18 @@ bool DFRobot_PH::isAcidic() {
 }
 
 
-void DFRobot_PH::calibrateAcidic() {
+bool DFRobot_PH::calibrateAcidic() {
     if (isAcidic() || !safe){  //buffer solution:4.0
-        Serial.println();
-        Serial.print(F(">>>Buffer Solution:4.0"));
+        Serial.println(F("\n>>>Buffer Solution:4.0"));
+        Serial.print(F("Voltage: "));
+        Serial.println(this->_voltage, 3);
         this->_acidVoltage =  this->_voltage;
         saveAcidic();
+        return true;
     }  else {
         Serial.print(this->_voltage, DEC);
         Serial.println(" out of range (1854, 2210). Not pH 4.0");
+        return false;
     }
 }
 

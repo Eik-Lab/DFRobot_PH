@@ -35,7 +35,10 @@ void loop() {
     static unsigned long timepoint = millis();
     voltage = analogRead(PH_PIN)/1024.0*5000;
     phValue = ph.readPH(voltage, NULL);
-    Serial.println(phValue, 3);
+    Serial.print(phValue, 3);
+    Serial.print(" (");
+    Serial.print(voltage, 3);
+    Serial.println(")");
 
     delay(1000);
 }
