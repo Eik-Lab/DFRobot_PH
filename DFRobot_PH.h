@@ -26,9 +26,9 @@
 class DFRobot_PH
 {
 public:
-    DFRobot_PH(int device = 0);
+    DFRobot_PH(byte device = 0);
     ~DFRobot_PH();
-    void    setValuesToCalibrate(float voltage, float temperature);
+    void    setValuesToCalibrate(float voltage);//, float temperature);
     float   readPH(float voltage, float temperature); // voltage to pH value, with temperature compensation
     void    begin(bool safe=true);   //initialization
 
@@ -41,7 +41,7 @@ public:
     void    setCalibration(float neutralVoltage, float acidVoltage);
 
 private:
-    float  _phValue;
+    //float  _phValue;
     float  _acidVoltage;
     float  _neutralVoltage;
     float  _voltage;
